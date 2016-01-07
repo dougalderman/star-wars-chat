@@ -7,10 +7,17 @@
 <body ng-controller="MasterCtrl">
     
     <form>
+<!--
         <input type="text" placeholder="Username..." ng-model="user.username">
         <input type="text" placeholder="Favorite Color..." ng-model="user.favorites.color">
         <input type="text" placeholder="Favorite Shape. . ." ng-model="user.favorites.shape">
         <button ng-click="addUser(user)">Add user</button>
+-->
+        <input type="email" placeholder="Email..." ng-model="user.email">
+        <input type="password" placeholder="Favorite Color..." ng-model="user.password">
+        <input type="text" placeholder="Favorite Shape. . ." ng-model="user.favorites.shape">
+        <button ng-click="login(user)">Log In</button>
+        <button ng-click =""
     </form>
     
     
@@ -48,22 +55,77 @@
         
         app.controller('MasterCtrl', function($scope, $firebaseObject, $firebaseArray,
                                               $firebaseAuth, firebaseRoot) {
-            var userRef = new Firebase(firebaseRoot + '/users/82342');
+            
+            var authObj = $firebaseAuth(new Firebase(firebaseRoot));
+            
+            $scope.authObj = authObj;
+            
+            $scope.login = function(user) {
+                // user = {email: 'asdfasdfsdfds@ysdfsd.com', password: 'asdfadsfds'}
+                authObj.$authwithPassord(user).then(fucntion(jwt) {
+                    var uid = jwt.uid;
+                    var serverUser = $firebaseObject(new Firebase(firebaseRoot +                            '/users/' + user ));
+                    serverUser.email = user.email;
+                    serverUser.$save();
+                    console.log('jwt', jwt);
+                }, function(err) {
+                    console.log('err', err);
+                }
+             });
+            };
+        
+        $scope.loginWith Google = function(user) {
+                // user = {email: 'asdfasdfsdfds@ysdfsd.com', password: 'asdfadsfds'}
+                authObj.$authwithOAuthPopup("google").then(fucntion(jwt) {
+                    var uid = jwt.uid;
+                    var serverUser = $firebaseObject(new Firebase(firebaseRoot +                            '/users/' + user ));
+                    serverUser.email = user.email;
+                    serverUser.$save();
+                    console.log('jwt', jwt);
+                }, function(err) {
+                    console.log('err', err);
+                }
+             });
+            };
+            
+            $scope.register = function(user {
+                authObj.createUser(user).then(function(jwt) {
+                    $scope.login(user);
+                }, function(err) {
+                console.log('register err', err)
+                });
+            };
+            
+            authObj.$onAuth(function(jwt) { // listens to auth events
+                console.log('auth jwt', jwt)
+                if (jwt) {
+                    $scope.user = $firebaseObject(new Firebase(firebaseRoot + '/users/'                                 + uid))
+                serverUser.email = jwt.password.email;
+                serverUser.$save();
+                    
+                $scope.user = serverUser;
+                } else {
+                    $scope.user = fasle;
+                }
+            });
+            
+            
+            // var userRef = new Firebase(firebaseRoot + '/users/82342');
             // for multiple users, would use login auth system.
             
-            var userObj = $firebaseObject(userRef);
-            
-            userObj.$bindTo($scope, 'user'); // 2-way bind.
-            
-            userObj.$loaded().then(function() {  // waits for user to load
-                userObj.starred = true;
-                userObj.$save();
-                console.log(userObj);
-            })
-            
-             $scope.addUser = function(user) {
-                 userObj.$add(user);
-            };
+//            var userObj = $firebaseObject(userRef);
+//            
+//            userObj.$bindTo($scope, 'user'); // 2-way bind.
+//            
+//            userObj.$loaded().then(function() {  // waits for user to load
+//                userObj.starred = true;
+//                userObj.$save();
+//                console.log(userObj);
+//            })
+//            
+//             $scope.addUser = function(user) {
+//                 userObj.$add(user);
+//            };
         });
         
         app.controller('MessagesCtrl', function($scope, $firebaseObject, $firebaseArray, firebaseRoot) {
